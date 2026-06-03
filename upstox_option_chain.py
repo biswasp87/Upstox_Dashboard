@@ -105,6 +105,9 @@ def process_option_chain_data(json_data):
                 for k, v in market_data.items():
                     row[f'market_{k}'] = v
 
+                # Calculate change in OI
+                row['market_change_oi'] = row.get('market_oi', 0) - row.get('market_prev_oi', 0)
+
                 greeks = opt_data.get('option_greeks', {})
                 for k, v in greeks.items():
                     row[f'greek_{k}'] = v
