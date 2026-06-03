@@ -120,9 +120,36 @@ def update_graphs(selected_stock):
     fig_iv = go.Figure()
     ce_df = stock_df[stock_df['option_type'] == 'CE']
     pe_df = stock_df[stock_df['option_type'] == 'PE']
-    fig_iv.add_trace(go.Scatter(x=ce_df['strike_price'], y=ce_df['greek_iv'], name='Call IV', line=dict(color='green')))
-    fig_iv.add_trace(go.Scatter(x=pe_df['strike_price'], y=pe_df['greek_iv'], name='Put IV', line=dict(color='red')))
-    fig_iv.update_layout(title="IV of Call and Put", xaxis_title="Strike Price", yaxis_title="IV")
+
+    # Eliminate zero volatility data
+    ce_iv_df = ce_df[ce_df['greek_iv'] > 0]
+    pe_iv_df = pe_df[pe_df['greek_iv'] > 0]
+
+    fig_iv.add_trace(go.Scatter(
+        x=ce_iv_df['strike_price'],
+        y=ce_iv_df['greek_iv'],
+        name='Call IV',
+        line=dict(color='green', shape='spline')
+    ))
+    fig_iv.add_trace(go.Scatter(
+        x=pe_iv_df['strike_price'],
+        y=pe_iv_df['greek_iv'],
+        name='Put IV',
+        line=dict(color='red', shape='spline')
+    ))
+    fig_iv.add_vline(x=underlying_price, line_dash="dash", line_color="blue", annotation_text="Underlying")
+
+    all_strikes = sorted(stock_df['strike_price'].unique())
+    fig_iv.update_layout(
+        title="IV of Call and Put",
+        xaxis_title="Strike Price",
+        yaxis_title="IV",
+        xaxis=dict(
+            tickmode='array',
+            tickvals=all_strikes,
+            ticktext=[str(s) for s in all_strikes]
+        )
+    )
 
     # 2. PCR Graph
     fig_pcr = go.Figure()
