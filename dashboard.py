@@ -139,15 +139,24 @@ def update_graphs(selected_stock):
     ))
     fig_iv.add_vline(x=underlying_price, line_dash="dash", line_color="blue", annotation_text="Underlying")
 
+    # Filter for 6 strikes above and below underlying
     all_strikes = sorted(stock_df['strike_price'].unique())
+    atm_strike = min(all_strikes, key=lambda x: abs(x - underlying_price))
+    atm_idx = all_strikes.index(atm_strike)
+
+    start_idx = max(0, atm_idx - 6)
+    end_idx = min(len(all_strikes), atm_idx + 7) # +7 because end is exclusive
+    selected_strikes = all_strikes[start_idx:end_idx]
+
     fig_iv.update_layout(
-        title="IV of Call and Put",
+        title="IV of Call and Put (6 Strikes Around ATM)",
         xaxis_title="Strike Price",
         yaxis_title="IV",
         xaxis=dict(
             tickmode='array',
-            tickvals=all_strikes,
-            ticktext=[str(s) for s in all_strikes]
+            tickvals=selected_strikes,
+            ticktext=[str(s) for s in selected_strikes],
+            range=[min(selected_strikes), max(selected_strikes)]
         )
     )
 
